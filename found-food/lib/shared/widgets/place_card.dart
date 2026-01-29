@@ -2,8 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:found_food/core/theme/app_colors.dart';
 import 'package:found_food/core/theme/app_typography.dart';
 import 'package:found_food/core/theme/app_dimensions.dart';
-
+import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:found_food/features/social/presentation/providers/follow_provider.dart';
+import 'package:found_food/features/profile/presentation/providers/profile_provider.dart';
+import 'package:found_food/features/profile/presentation/screens/public_profile_screen.dart';
 class PlaceCard extends StatelessWidget {
+  final String authorId; // New field
+  final String authorName;
+  final String? authorAvatarUrl;
+  final bool isLiked;
+  final bool isFavorited;
   final String placeName;
   final String location;
   final String priceRange;
@@ -11,13 +20,21 @@ class PlaceCard extends StatelessWidget {
   final int likes;
   final int comments;
   final String imageUrl;
-  final List<String> foodImages; // Miniatures de plats
+  final List<String> foodImages; 
   final VoidCallback onTap;
   final VoidCallback onDirections;
-  final VoidCallback onViewDetails;  // Remplace onCall
+  final VoidCallback onViewDetails; 
+  final VoidCallback? onLike;
+  final VoidCallback? onFavorite;
+  final VoidCallback? onComment;
 
   const PlaceCard({
     super.key,
+    required this.authorId, // Requiring authorId
+    required this.authorName,
+    this.authorAvatarUrl,
+    required this.isLiked,
+    required this.isFavorited,
     required this.placeName,
     required this.location,
     required this.priceRange,
@@ -28,18 +45,29 @@ class PlaceCard extends StatelessWidget {
     required this.foodImages,
     required this.onTap,
     required this.onDirections,
-    required this.onViewDetails,  // Remplace onCall
+    required this.onViewDetails, 
+    this.onLike,
+    this.onFavorite,
+    this.onComment,
   });
 
   @override
   Widget build(BuildContext context) {
+    // Check follow status on build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<FollowProvider>().checkFollowStatus(authorId);
+    });
+
+    final currentUserId = Supabase.instance.client.auth.currentUser?.id;
+    final isCurrentUser = currentUserId == authorId;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(
           left: 16,
           right: 16,
-          bottom: 8,  // Réduit de 12 à 8 pour éviter overflow en bas
+          bottom: 8,
         ),
         decoration: BoxDecoration(
           color: AppColors.cardBackground,
@@ -49,6 +77,96 @@ class PlaceCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+
+
+            // Header Auteur
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+              child: Row(
+                children: [
+                   GestureDetector(
+                    onTap: () {
+                      if (!isCurrentUser) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PublicProfileScreen(userId: authorId),
+                          ),
+                        );
+                      }
+                    },
+                    child: Row(
+                      children: [
+                         Consumer<ProfileProvider>(
+                          builder: (context, profileProvider, _) {
+                            // If it's the current user, use the live profile avatar
+                            // Otherwise, use the one from the post (authorAvatarUrl)
+                            final avatarUrl = (isCurrentUser && profileProvider.userProfile?.avatarUrl != null)
+                                ? profileProvider.userProfile!.avatarUrl
+                                : authorAvatarUrl;
+                            
+                            return CircleAvatar(
+                              radius: 14,
+                              backgroundColor: AppColors.primaryOrange.withOpacity(0.1),
+                              backgroundImage: avatarUrl != null && avatarUrl.isNotEmpty
+                                  ? NetworkImage(avatarUrl)
+                                  : null,
+                              child: avatarUrl == null || avatarUrl.isEmpty
+                                  ? const Icon(Icons.person, size: 16, color: AppColors.primaryOrange)
+                                  : null,
+                            );
+                          },
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          authorName,
+                          style: AppTypography.bodySmall.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
+                   ),
+                  const Spacer(),
+                  // Follow Button
+                  if (!isCurrentUser)
+                  Consumer<FollowProvider>(
+                    builder: (context, followProvider, _) {
+                      final isFollowing = followProvider.isFollowing(authorId);
+                      return GestureDetector(
+                        onTap: () {
+                          followProvider.toggleFollow(authorId);
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: isFollowing 
+                                ? Colors.transparent 
+                                : AppColors.primaryOrange.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                            border: isFollowing 
+                                ? Border.all(color: AppColors.borderColor) 
+                                : null,
+                          ),
+                          child: Text(
+                            isFollowing ? 'Abonné' : 'Suivre',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: isFollowing 
+                                  ? AppColors.textSecondary 
+                                  : AppColors.primaryOrange,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+            
             // Image principale
             Stack(
               children: [
@@ -85,6 +203,7 @@ class PlaceCard extends StatelessWidget {
                 ),
                 
                 // Badge distance
+                if (distance.isNotEmpty)
                 Positioned(
                   top: 10,
                   right: 10,
@@ -210,10 +329,13 @@ class PlaceCard extends StatelessWidget {
                   // Likes, Comments, View Menu
                   Row(
                     children: [
-                      const Icon(
-                        Icons.favorite_border,
-                        size: 18,
-                        color: Color(0xFF95A5A6),
+                      GestureDetector(
+                        onTap: onLike,
+                        child: Icon(
+                          isLiked ? Icons.favorite : Icons.favorite_border,
+                          size: 18,
+                          color: isLiked ? AppColors.primaryOrange : const Color(0xFF95A5A6),
+                        ),
                       ),
                       const SizedBox(width: 3),
                       Text(
@@ -224,10 +346,13 @@ class PlaceCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 12),
-                      const Icon(
-                        Icons.chat_bubble_outline,
-                        size: 18,
-                        color: Color(0xFF95A5A6),
+                      GestureDetector(
+                        onTap: onComment,
+                        child: const Icon(
+                          Icons.chat_bubble_outline,
+                          size: 18,
+                          color: Color(0xFF95A5A6),
+                        ),
                       ),
                       const SizedBox(width: 3),
                       Text(
@@ -235,6 +360,15 @@ class PlaceCard extends StatelessWidget {
                         style: AppTypography.bodySmall.copyWith(
                           color: AppColors.textSecondary,
                           fontSize: 12,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      GestureDetector(
+                        onTap: onFavorite,
+                        child: Icon(
+                          isFavorited ? Icons.bookmark : Icons.bookmark_border,
+                          size: 18,
+                          color: isFavorited ? AppColors.primaryOrange : const Color(0xFF95A5A6),
                         ),
                       ),
                       const Spacer(),

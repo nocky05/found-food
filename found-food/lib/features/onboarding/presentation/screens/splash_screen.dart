@@ -49,96 +49,100 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       body: Stack(
+        fit: StackFit.expand,
         children: [
-          // Background image
-          Positioned.fill(
-            child: Image.asset(
-              'assets/images/splash/background.png',
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        const Color(0xFF1A1A1A),
-                        const Color(0xFF2D3436),
-                      ],
-                    ),
+          // Background Image with dark overlay
+          Image.asset(
+            'assets/images/splash/background.png',
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color(0xFF121212),
+                      Color(0xFF1A1A1A),
+                    ],
                   ),
-                );
-              },
-            ),
+                ),
+              );
+            },
           ),
           
-          // Dark overlay
-          Positioned.fill(
-            child: Container(
-              color: Colors.black.withOpacity(0.4),
+          // Dark Gradient Overlay - Increased opacity to make logo pop
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.black.withOpacity(0.8), // Darker at top
+                  Colors.black.withOpacity(0.6), // Dark in middle
+                  Colors.black.withOpacity(0.9), // Almost black at bottom
+                ],
+              ),
             ),
           ),
           
           // Content
-          Center(
-            child: FadeTransition(
-              opacity: _fadeAnimation,
-              child: ScaleTransition(
-                scale: _scaleAnimation,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Logo
-                    Image.asset(
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Composite Logo Image (contains Logo, Name, and Slogan)
+              FadeTransition(
+                opacity: _fadeAnimation,
+                child: ScaleTransition(
+                  scale: _scaleAnimation,
+                  child: Container(
+                    width: 300, // Adjusted for full composite logo
+                    height: 300,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFFFFD700).withOpacity(0.03), // Reduced opacity for more subtle effect
+                          blurRadius: 40,
+                          spreadRadius: 2,
+                        ),
+                      ],
+                    ),
+                    child: Image.asset(
                       'assets/images/logo/logo.png',
-                      width: 120,
-                      height: 120,
+                      fit: BoxFit.contain,
                       errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          width: 120,
-                          height: 120,
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryOrange,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.restaurant,
-                            size: 60,
-                            color: Colors.white,
-                          ),
+                        return const Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.restaurant,
+                              size: 80,
+                              color: Color(0xFFFFD700),
+                            ),
+                            SizedBox(height: 16),
+                            Text(
+                              'Found-Food',
+                              style: TextStyle(
+                                color: Color(0xFFFFD700),
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         );
                       },
                     ),
-                    const SizedBox(height: 24),
-                    
-                    // App Name
-                    const Text(
-                      'Found-Food',
-                      style: TextStyle(
-                        fontSize: 36,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFFFF6B35),
-                        letterSpacing: 1.2,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    
-                    // Slogan
-                    const Text(
-                      'Votre guide gourmand communautaire',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Color(0xFFB2BEC3),
-                        fontWeight: FontWeight.w400,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
+          
+          // Optional: Bottom food image reference if asset exists
+          // This would be positioned at the very bottom like in the image
         ],
       ),
     );

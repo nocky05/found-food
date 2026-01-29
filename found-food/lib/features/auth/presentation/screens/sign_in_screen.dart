@@ -6,6 +6,8 @@ import 'package:found_food/core/utils/validators.dart';
 import 'package:found_food/shared/widgets/buttons/custom_buttons.dart';
 import 'sign_up_screen.dart';
 import 'package:found_food/main.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -19,7 +21,6 @@ class _SignInScreenState extends State<SignInScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
-  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -30,17 +31,26 @@ class _SignInScreenState extends State<SignInScreen> {
 
   Future<void> _signIn() async {
     if (_formKey.currentState!.validate()) {
-      setState(() => _isLoading = true);
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
       
-      // TODO: Implement Supabase sign in
-      await Future.delayed(const Duration(seconds: 2));
-      
-      setState(() => _isLoading = false);
+      final success = await authProvider.signIn(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
+      );
       
       if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const MainScreen()),
-        );
+        if (success) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const MainScreen()),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(authProvider.error ?? 'Erreur de connexion'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     }
   }
@@ -169,11 +179,15 @@ class _SignInScreenState extends State<SignInScreen> {
                 const SizedBox(height: AppDimensions.spaceLG),
                 
                 // Sign In Button
-                PrimaryButton(
-                  text: 'Se connecter',
-                  onPressed: _signIn,
-                  isLoading: _isLoading,
-                  backgroundColor: AppColors.primaryOrange,  // Orange vif
+                Consumer<AuthProvider>(
+                  builder: (context, auth, _) {
+                    return PrimaryButton(
+                      text: 'Se connecter',
+                      onPressed: _signIn,
+                      isLoading: auth.isLoading,
+                      backgroundColor: AppColors.primaryOrange,
+                    );
+                  },
                 ),
                 const SizedBox(height: AppDimensions.spaceMD),
                 
