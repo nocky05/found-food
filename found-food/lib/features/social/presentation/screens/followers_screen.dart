@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:found_food/features/social/presentation/providers/follow_provider.dart';
+import 'package:found_food/features/profile/presentation/screens/public_profile_screen.dart';
+import 'package:found_food/features/profile/presentation/screens/profile_screen.dart';
 
 class FollowersScreen extends StatelessWidget {
   final String userId;
@@ -10,6 +15,8 @@ class FollowersScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentUserId = Supabase.instance.client.auth.currentUser?.id;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Abonnés', style: TextStyle(color: Colors.black)),
@@ -18,7 +25,7 @@ class FollowersScreen extends StatelessWidget {
         iconTheme: const IconThemeData(color: Colors.black),
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: context.read<provider.FollowProvider>().fetchFollowersList(userId),
+        future: context.read<FollowProvider>().fetchFollowersList(userId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -49,9 +56,24 @@ class FollowersScreen extends StatelessWidget {
                 ),
                 title: Text(profile['full_name'] ?? 'Utilisateur'),
                 subtitle: Text('@${profile['username'] ?? ""}'),
-                trailing: userId == Supabase.instance.client.auth.currentUser?.id 
-                   ? null // On ne se suit pas soi-même dans sa propre liste
-                   : _FollowButton(targetUserId: followerId), // Bouton pour suivre en retour
+                trailing: followerId == currentUserId 
+                   ? null 
+                   : _FollowButton(targetUserId: followerId),
+                onTap: () {
+                  if (followerId == currentUserId) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                    );
+                  } else {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PublicProfileScreen(userId: followerId),
+                      ),
+                    );
+                  }
+                },
               );
             },
           );
@@ -67,7 +89,7 @@ class _FollowButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<provider.FollowProvider>(
+    return Consumer<FollowProvider>(
       builder: (context, followProvider, _) {
         final isFollowing = followProvider.isFollowing(targetUserId);
         return ElevatedButton(

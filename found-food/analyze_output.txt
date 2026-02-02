@@ -1,0 +1,170 @@
+Analyzing found-food...                                         
+
+  error - The named parameter 'post' is required, but there's no corresponding argument - lib\core\config\app_router.dart:81:18 - missing_required_argument
+  error - The named parameter 'placeId' isn't defined - lib\core\config\app_router.dart:81:37 - undefined_named_parameter
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\core\theme\app_colors.dart:101:27 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\core\theme\app_colors.dart:109:38 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\core\theme\app_colors.dart:117:27 - deprecated_member_use
+  error - Invalid constant value - lib\core\theme\app_theme.dart:30:26 - invalid_constant
+  error - The getter 'cardColor' isn't defined for the type 'AppColors' - lib\core\theme\app_theme.dart:30:36 - undefined_getter
+  error - The argument type 'CardTheme' can't be assigned to the parameter type 'CardThemeData?'.  - lib\core\theme\app_theme.dart:42:18 - argument_type_not_assignable
+  error - The getter 'cardColor' isn't defined for the type 'AppColors' - lib\core\theme\app_theme.dart:44:26 - undefined_getter
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\core\theme\app_theme.dart:48:35 - deprecated_member_use
+  error - The getter 'cardColor' isn't defined for the type 'AppColors' - lib\core\theme\app_theme.dart:92:30 - undefined_getter
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\core\theme\app_theme.dart:100:40 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\core\theme\app_theme.dart:107:40 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\core\theme\app_theme.dart:138:36 - deprecated_member_use
+  error - Invalid constant value - lib\core\theme\app_theme.dart:145:26 - invalid_constant
+  error - The getter 'cardColor' isn't defined for the type 'AppColors' - lib\core\theme\app_theme.dart:145:36 - undefined_getter
+  error - Invalid constant value - lib\core\theme\app_theme.dart:191:18 - invalid_constant
+  error - The getter 'darkBackground' isn't defined for the type 'AppColors' - lib\core\theme\app_theme.dart:191:28 - undefined_getter
+  error - The getter 'darkBackground' isn't defined for the type 'AppColors' - lib\core\theme\app_theme.dart:196:42 - undefined_getter
+  error - Invalid constant value - lib\core\theme\app_theme.dart:202:26 - invalid_constant
+  error - The getter 'darkCard' isn't defined for the type 'AppColors' - lib\core\theme\app_theme.dart:202:36 - undefined_getter
+  error - The argument type 'CardTheme' can't be assigned to the parameter type 'CardThemeData?'.  - lib\core\theme\app_theme.dart:214:18 - argument_type_not_assignable
+  error - The getter 'darkCard' isn't defined for the type 'AppColors' - lib\core\theme\app_theme.dart:216:26 - undefined_getter
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\auth\presentation\screens\sign_up_email_screen.dart:159:52 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\auth\presentation\screens\sign_up_email_screen.dart:165:65 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\auth\presentation\screens\sign_up_email_screen.dart:167:52 - use_build_context_synchronously
+warning - Unused import: 'package:found_food/features/stories/domain/models/story_model.dart' - lib\features\feed\presentation\screens\feed_screen.dart:6:8 - unused_import
+warning - The value of the field '_stories' isn't used - lib\features\feed\presentation\screens\feed_screen.dart:39:36 - unused_field
+warning - The value of the field '_places' isn't used - lib\features\feed\presentation\screens\feed_screen.dart:49:36 - unused_field
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\feed\presentation\screens\feed_screen.dart:218:33 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\features\feed\presentation\screens\feed_screen.dart:240:11 - prefer_const_constructors
+   info - Don't invoke 'print' in production code - lib\features\map\presentation\providers\map_provider.dart:40:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\map\presentation\providers\map_provider.dart:68:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\map\presentation\providers\map_provider.dart:94:7 - avoid_print
+   info - Use 'const' with the constructor to improve performance - lib\features\onboarding\presentation\screens\onboarding_screen.dart:123:25 - prefer_const_constructors
+warning - Unused import: 'package:found_food/core/theme/app_colors.dart' - lib\features\onboarding\presentation\screens\splash_screen.dart:2:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\onboarding\presentation\screens\splash_screen.dart:83:32 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\onboarding\presentation\screens\splash_screen.dart:84:32 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\onboarding\presentation\screens\splash_screen.dart:85:32 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\onboarding\presentation\screens\splash_screen.dart:107:58 - deprecated_member_use
+   info - Don't invoke 'print' in production code - lib\features\places\domain\repositories\place_repository.dart:104:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\places\presentation\providers\place_provider.dart:30:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\places\presentation\screens\add_place_screen.dart:91:7 - avoid_print
+   info - Use 'const' with the constructor to improve performance - lib\features\places\presentation\screens\add_place_screen.dart:141:16 - prefer_const_constructors
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\places\presentation\screens\add_place_screen.dart:179:51 - deprecated_member_use
+   info - Unnecessary use of 'toList' in a spread - lib\features\places\presentation\screens\add_place_screen.dart:188:14 - unnecessary_to_list_in_spreads
+   info - Use 'const' with the constructor to improve performance - lib\features\places\presentation\screens\add_place_screen.dart:191:20 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\places\presentation\screens\add_place_screen.dart:191:65 - prefer_const_constructors
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\places\presentation\screens\add_place_screen.dart:206:40 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\places\presentation\screens\add_place_screen.dart:208:59 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\places\presentation\screens\add_place_screen.dart:247:51 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\places\presentation\screens\add_place_screen.dart:312:63 - deprecated_member_use
+   info - Unnecessary use of 'toList' in a spread - lib\features\places\presentation\screens\add_place_screen.dart:370:14 - unnecessary_to_list_in_spreads
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\places\presentation\screens\add_place_screen.dart:484:51 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\features\places\presentation\screens\add_place_screen.dart:505:19 - prefer_const_constructors
+   info - 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre - lib\features\places\presentation\screens\add_place_screen.dart:507:7 - deprecated_member_use
+warning - Unused import: 'package:found_food/features/profile/presentation/screens/edit_profile_screen.dart' - lib\features\places\presentation\screens\place_details_screen.dart:12:8 - unused_import
+warning - Unused import: 'package:found_food/features/auth/presentation/providers/auth_provider.dart' - lib\features\places\presentation\screens\place_details_screen.dart:13:8 - unused_import
+   info - Don't invoke 'print' in production code - lib\features\places\presentation\screens\place_details_screen.dart:53:7 - avoid_print
+   info - Don't use 'BuildContext's across async gaps - lib\features\places\presentation\screens\place_details_screen.dart:73:28 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\features\places\presentation\screens\place_details_screen.dart:77:28 - use_build_context_synchronously
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\places\presentation\screens\place_details_screen.dart:162:34 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\places\presentation\screens\place_details_screen.dart:164:34 - deprecated_member_use
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\places\presentation\screens\place_details_screen.dart:202:29 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\places\presentation\screens\place_details_screen.dart:204:30 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\places\presentation\screens\place_details_screen.dart:207:23 - use_build_context_synchronously
+   info - Use 'const' with the constructor to improve performance - lib\features\places\presentation\screens\place_details_screen.dart:386:32 - prefer_const_constructors
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\places\presentation\screens\place_details_screen.dart:404:40 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\places\presentation\screens\place_details_screen.dart:406:59 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\places\presentation\screens\place_details_screen.dart:571:37 - deprecated_member_use
+  error - Methods can't be invoked in constant expressions - lib\features\places\presentation\screens\place_details_screen.dart:627:26 - const_eval_method_invocation
+warning - Unused import: 'package:uuid/uuid.dart' - lib\features\posts\domain\models\post_model.dart:1:8 - unused_import
+   info - Don't invoke 'print' in production code - lib\features\posts\domain\repositories\post_repository.dart:40:11 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\posts\domain\repositories\post_repository.dart:55:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\posts\domain\repositories\post_repository.dart:69:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\posts\domain\repositories\post_repository.dart:137:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\posts\domain\repositories\post_repository.dart:156:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\posts\domain\repositories\post_repository.dart:181:11 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\posts\domain\repositories\post_repository.dart:193:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\posts\presentation\providers\post_provider.dart:30:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\posts\presentation\providers\post_provider.dart:65:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\posts\presentation\providers\post_provider.dart:100:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\posts\presentation\providers\post_provider.dart:122:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\posts\presentation\providers\post_provider.dart:138:7 - avoid_print
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\posts\presentation\screens\add_selection_screen.dart:24:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\posts\presentation\screens\add_selection_screen.dart:36:50 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\posts\presentation\screens\add_selection_screen.dart:58:60 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\posts\presentation\screens\add_selection_screen.dart:112:60 - deprecated_member_use
+   info - The private field _rating could be 'final' - lib\features\posts\presentation\screens\create_post_screen.dart:21:10 - prefer_final_fields
+warning - The value of the field '_rating' isn't used - lib\features\posts\presentation\screens\create_post_screen.dart:21:10 - unused_field
+  error - The named parameter 'mediaFiles' is required, but there's no corresponding argument - lib\features\posts\presentation\screens\create_post_screen.dart:92:40 - missing_required_argument
+  error - The named parameter 'mediaPaths' isn't defined - lib\features\posts\presentation\screens\create_post_screen.dart:99:7 - undefined_named_parameter
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\posts\presentation\screens\create_post_screen.dart:189:75 - deprecated_member_use
+   info - Unnecessary use of 'toList' in a spread - lib\features\posts\presentation\screens\create_post_screen.dart:213:22 - unnecessary_to_list_in_spreads
+   info - Don't invoke 'print' in production code - lib\features\profile\domain\repositories\profile_repository.dart:56:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\profile\domain\repositories\profile_repository.dart:120:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\profile\presentation\providers\profile_provider.dart:40:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\profile\presentation\providers\profile_provider.dart:47:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\profile\presentation\providers\profile_provider.dart:54:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\profile\presentation\providers\profile_provider.dart:58:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\profile\presentation\providers\profile_provider.dart:147:7 - avoid_print
+warning - Unused import: 'dart:io' - lib\features\profile\presentation\screens\edit_profile_screen.dart:1:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\profile\presentation\screens\favorites_screen.dart:102:76 - deprecated_member_use
+warning - The value of the local variable 'isDark' isn't used - lib\features\profile\presentation\screens\profile_screen.dart:87:11 - unused_local_variable
+  error - Undefined name 'isDark' - lib\features\profile\presentation\screens\profile_screen.dart:165:38 - undefined_identifier
+  error - Undefined name 'isDark' - lib\features\profile\presentation\screens\profile_screen.dart:173:36 - undefined_identifier
+  error - Undefined name 'theme' - lib\features\profile\presentation\screens\profile_screen.dart:184:53 - undefined_identifier
+warning - The operand can't be 'null', so the condition is always 'true' - lib\features\profile\presentation\screens\profile_screen.dart:186:32 - unnecessary_null_comparison
+  error - Undefined name 'isDark' - lib\features\profile\presentation\screens\profile_screen.dart:190:24 - undefined_identifier
+  error - Undefined name 'isDark' - lib\features\profile\presentation\screens\profile_screen.dart:201:26 - undefined_identifier
+warning - Unused import: 'package:supabase_flutter/supabase_flutter.dart' - lib\features\profile\presentation\screens\public_profile_screen.dart:13:8 - unused_import
+warning - The operand can't be 'null', so the condition is always 'true' - lib\features\profile\presentation\screens\public_profile_screen.dart:175:34 - unnecessary_null_comparison
+   info - 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre - lib\features\profile\presentation\screens\settings_screen.dart:241:15 - deprecated_member_use
+   info - Don't invoke 'print' in production code - lib\features\search\data\repositories\search_repository.dart:19:7 - avoid_print
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\search\presentation\screens\search_screen.dart:103:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\search\presentation\screens\search_screen.dart:179:56 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\search\presentation\screens\search_screen.dart:269:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\search\presentation\screens\search_screen.dart:308:37 - deprecated_member_use
+   info - Don't invoke 'print' in production code - lib\features\social\data\repositories\follow_repository.dart:35:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\social\data\repositories\follow_repository.dart:49:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\social\data\repositories\follow_repository.dart:63:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\social\data\repositories\follow_repository.dart:77:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\social\data\repositories\follow_repository.dart:92:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\social\data\repositories\notification_repository.dart:25:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\social\data\repositories\notification_repository.dart:42:7 - avoid_print
+   info - Use 'rethrow' to rethrow a caught exception - lib\features\social\data\repositories\notification_repository.dart:43:7 - use_rethrow_when_possible
+   info - Don't invoke 'print' in production code - lib\features\social\data\repositories\notification_repository.dart:55:7 - avoid_print
+   info - Use 'rethrow' to rethrow a caught exception - lib\features\social\data\repositories\notification_repository.dart:56:7 - use_rethrow_when_possible
+   info - Don't invoke 'print' in production code - lib\features\social\presentation\providers\follow_provider.dart:29:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\social\presentation\providers\follow_provider.dart:45:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\social\presentation\providers\notification_provider.dart:43:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\social\presentation\providers\notification_provider.dart:56:7 - avoid_print
+   info - Don't use 'BuildContext's across async gaps - lib\features\social\presentation\screens\notifications_screen.dart:21:7 - use_build_context_synchronously
+   info - Statements in an if should be enclosed in a block - lib\features\social\presentation\screens\notifications_screen.dart:85:37 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\features\social\presentation\screens\notifications_screen.dart:86:45 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\features\social\presentation\screens\notifications_screen.dart:87:44 - curly_braces_in_flow_control_structures
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\social\presentation\screens\notifications_screen.dart:90:60 - deprecated_member_use
+warning - Unused import: 'dart:io' - lib\features\stories\data\repositories\story_repository.dart:1:8 - unused_import
+   info - Don't invoke 'print' in production code - lib\features\stories\data\repositories\story_repository.dart:12:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\stories\data\repositories\story_repository.dart:18:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\stories\data\repositories\story_repository.dart:20:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\stories\data\repositories\story_repository.dart:30:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\stories\data\repositories\story_repository.dart:41:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\stories\data\repositories\story_repository.dart:52:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\stories\data\repositories\story_repository.dart:57:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\stories\data\repositories\story_repository.dart:66:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\stories\data\repositories\story_repository.dart:69:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\stories\data\repositories\story_repository.dart:78:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\stories\data\repositories\story_repository.dart:80:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\stories\presentation\providers\story_provider.dart:47:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\stories\presentation\providers\story_provider.dart:49:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\stories\presentation\providers\story_provider.dart:53:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\stories\presentation\providers\story_provider.dart:54:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\stories\presentation\providers\story_provider.dart:58:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\stories\presentation\providers\story_provider.dart:61:7 - avoid_print
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\stories\presentation\screens\story_viewer_screen.dart:177:47 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\main.dart:79:22 - prefer_const_constructors
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\shared\widgets\bottom_navigation.dart:24:33 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\shared\widgets\buttons\custom_buttons.dart:114:19 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\shared\widgets\buttons\custom_buttons.dart:117:28 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\shared\widgets\buttons\custom_buttons.dart:119:35 - prefer_const_constructors
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\shared\widgets\buttons\custom_buttons.dart:176:65 - deprecated_member_use
+warning - Unused import: 'package:found_food/core/theme/app_dimensions.dart' - lib\shared\widgets\place_card.dart:4:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\shared\widgets\place_card.dart:115:74 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\shared\widgets\place_card.dart:155:59 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\shared\widgets\place_card.dart:351:55 - deprecated_member_use
+  error - The name 'MyApp' isn't a class - test\widget_test.dart:16:35 - creation_with_non_type
+

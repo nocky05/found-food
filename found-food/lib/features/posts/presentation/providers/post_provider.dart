@@ -122,4 +122,23 @@ class PostProvider extends ChangeNotifier {
       print("Erreur fetchComments: $e");
     }
   }
+
+  // Supprimer un post
+  Future<bool> deletePost(String postId) async {
+    try {
+      // Optimistic update: retirer immédiatement de la liste locale
+      _feedPosts.removeWhere((post) => post.id == postId);
+      notifyListeners();
+
+      // Appel backend
+      await _postRepository.deletePost(postId);
+      return true;
+    } catch (e) {
+      _error = "Impossible de supprimer le post";
+      print("Erreur deletePost: $e");
+      // Recharger le feed en cas d'erreur pour restaurer l'état
+      await fetchFeed();
+      return false;
+    }
+  }
 }

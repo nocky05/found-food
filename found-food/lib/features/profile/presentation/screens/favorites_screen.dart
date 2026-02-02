@@ -22,14 +22,17 @@ class FavoritesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).cardColor,
         elevation: 0,
-        title: const Text(
+        iconTheme: IconThemeData(
+          color: Theme.of(context).textTheme.bodyLarge?.color
+        ),
+        title: Text(
           'Mes Favoris',
           style: TextStyle(
-            color: AppColors.textPrimary,
+            color: Theme.of(context).textTheme.bodyLarge?.color,
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
@@ -42,7 +45,7 @@ class FavoritesScreen extends StatelessWidget {
           }
 
           if (provider.favoritePosts.isEmpty) {
-            return _buildEmptyState();
+            return _buildEmptyState(context);
           }
 
           return ListView.builder(
@@ -94,7 +97,7 @@ class FavoritesScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -106,10 +109,14 @@ class FavoritesScreen extends StatelessWidget {
             style: AppTypography.h4.copyWith(color: AppColors.textSecondary),
           ),
           const SizedBox(height: AppDimensions.spaceSM),
-          const Text(
+          Text(
             'Enregistrez les lieux que vous aimez pour les retrouver ici.',
             textAlign: TextAlign.center,
-            style: AppTypography.bodySmall,
+            style: AppTypography.bodySmall.copyWith(
+              color: Theme.of(context).brightness == Brightness.dark 
+                  ? Colors.white38 
+                  : AppColors.textLight
+            ),
           ),
         ],
       ),
@@ -126,9 +133,9 @@ class FavoritesScreen extends StatelessWidget {
         padding: EdgeInsets.only(
           bottom: MediaQuery.of(context).viewInsets.bottom,
         ),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Padding(
           padding: const EdgeInsets.all(20),

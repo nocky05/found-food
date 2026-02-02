@@ -157,4 +157,41 @@ class PostRepository {
       return [];
     }
   }
+
+  // Supprimer un post
+  Future<void> deletePost(String postId) async {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) throw Exception('User not authenticated');
+
+    try {
+      // 1. Récupérer les médias associés pour les supprimer du storage
+      final mediaResponse = await _supabase
+          .from('post_media')
+          .select('url')
+          .eq('post_id', postId);
+
+      // 2. Supprimer les fichiers du storage
+      for (var media in (mediaResponse as List)) {
+        final url = media['url'] as String;
+        // Extraire le nom du fichier de l'URL
+        final fileName = url.split('/').last;
+        try {
+          await _supabase.storage.from('posts').remove([fileName]);
+        } catch (e) {
+          print('Erreur suppression fichier storage: $e');
+        }
+      }
+
+      // 3. Supprimer le post (les médias, likes, comments seront supprimés en cascade)
+      await _supabase
+          .from('posts')
+          .delete()
+          .eq('id', postId)
+          .eq('author_id', userId); // Sécurité: seul l'auteur peut supprimer
+
+    } catch (e) {
+      print('Erreur deletePost: $e');
+      rethrow;
+    }
+  }
 }

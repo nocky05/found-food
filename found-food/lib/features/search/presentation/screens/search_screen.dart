@@ -3,6 +3,8 @@ import 'package:found_food/core/theme/app_colors.dart';
 import 'package:found_food/core/theme/app_dimensions.dart';
 import 'package:found_food/core/theme/app_typography.dart';
 import 'package:found_food/features/search/presentation/providers/search_provider.dart';
+import 'package:found_food/features/places/domain/repositories/place_repository.dart';
+import 'package:found_food/features/places/presentation/screens/place_details_screen.dart';
 import 'package:provider/provider.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -13,6 +15,8 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  
   final List<String> _categories = [
     'Restaurants', 'Cafés', 'Plages', 'Parcs', 'Piscines', 'Îles', 'Espaces Publics'
   ];
@@ -24,9 +28,15 @@ class _SearchScreenState extends State<SearchScreen> {
   String _selectedBudget = '';
 
   @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,25 +49,43 @@ class _SearchScreenState extends State<SearchScreen> {
                     return const Center(child: CircularProgressIndicator());
                   }
 
-                  if (provider.results.isNotEmpty) {
-                    return _buildSearchResults(provider.results);
+                  // Si une recherche est active et (a des résultats OU n'a pas de résultats mais ce n'est pas vide)
+                  // On veut afficher la liste ou "Rien trouvé"
+                  if (_searchController.text.isNotEmpty) {
+                     if (provider.results.isNotEmpty) {
+                       return _buildSearchResults(provider.results);
+                     } else {
+                       return Center(
+                         child: Column(
+                           mainAxisAlignment: MainAxisAlignment.center,
+                           children: [
+                             const Icon(Icons.search_off, size: 64, color: Colors.grey),
+                             const SizedBox(height: 16),
+                             Text(
+                               'Aucun lieu trouvé pour "${_searchController.text}"', 
+                               style: AppTypography.bodyMedium.copyWith(
+                                 color: Theme.of(context).textTheme.bodyLarge?.color
+                               )
+                             ),
+                           ],
+                         ),
+                       );
+                     }
                   }
 
+                  // Default state: Suggestions & Categories
                   return SingleChildScrollView(
                     padding: const EdgeInsets.all(AppDimensions.paddingMD),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildSectionTitle('Budget'),
+                        _buildSectionTitle('Explorer par Budget', 'Sélectionnez une fourchette de prix'),
                         const SizedBox(height: AppDimensions.spaceSM),
                         _buildBudgetFilters(),
                         const SizedBox(height: AppDimensions.spaceLG),
-                        _buildSectionTitle('Catégories'),
+                        _buildSectionTitle('Catégories Populaires', 'Suggestions de lieux à visiter'),
                         const SizedBox(height: AppDimensions.spaceSM),
                         _buildCategoriesGrid(),
-                        const SizedBox(height: AppDimensions.spaceLG),
-                        _buildSectionTitle('Recherches récentes'),
-                        _buildRecentSearches(),
                       ],
                     ),
                   );
@@ -74,30 +102,50 @@ class _SearchScreenState extends State<SearchScreen> {
     return Container(
       padding: const EdgeInsets.all(AppDimensions.paddingMD),
       decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: Theme.of(context).cardColor,
+        boxShadow: Theme.of(context).brightness == Brightness.dark 
+            ? null 
+            : [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
       ),
       child: Column(
         children: [
           Container(
             padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingMD),
             decoration: BoxDecoration(
-              color: AppColors.surfaceColor,
+              color: Theme.of(context).brightness == Brightness.dark 
+                  ? Colors.white.withOpacity(0.05) 
+                  : AppColors.surfaceColor,
               borderRadius: BorderRadius.circular(AppDimensions.radiusMD),
             ),
             child: TextField(
+              controller: _searchController,
               onChanged: (value) => context.read<SearchProvider>().onQueryChanged(value),
-              decoration: const InputDecoration(
-                hintText: 'Où voulez-vous manger ?',
-                hintStyle: TextStyle(color: AppColors.textLight),
+              decoration: InputDecoration(
+                hintText: 'Rechercher un lieu, resto...',
+                hintStyle: TextStyle(
+                  color: Theme.of(context).brightness == Brightness.dark 
+                      ? Colors.white38 
+                      : AppColors.textLight
+                ),
                 border: InputBorder.none,
-                icon: Icon(Icons.search, color: AppColors.primaryOrange),
+                icon: const Icon(Icons.search, color: AppColors.primaryOrange),
+                suffixIcon: _searchController.text.isNotEmpty 
+                  ? IconButton(
+                      icon: const Icon(Icons.clear, size: 20),
+                      onPressed: () {
+                        setState(() {
+                          _searchController.clear();
+                          context.read<SearchProvider>().onQueryChanged('');
+                        });
+                      },
+                    )
+                  : null,
               ),
             ),
           ),
@@ -145,7 +193,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
-                        place.category ?? 'Restaurant',
+                        place.category ?? 'Lieu',
                         style: const TextStyle(
                           color: AppColors.primaryOrange,
                           fontSize: 10,
@@ -153,21 +201,44 @@ class _SearchScreenState extends State<SearchScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Text(
-                      place.budgetRange ?? 'FCFA',
-                      style: const TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 10,
-                      ),
-                    ),
                   ],
                 ),
               ],
             ),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              // Navigation vers les détails ici
+            onTap: () async {
+              // Fetch posts for this place
+              try {
+                final posts = await PlaceRepository().getPostsForPlace(place.id);
+                
+                if (!context.mounted) return;
+                
+                if (posts.isEmpty) {
+                  // No posts yet for this place
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Aucun post pour "${place.name}" pour le moment'),
+                      action: SnackBarAction(
+                        label: 'OK',
+                        onPressed: () {},
+                      ),
+                    ),
+                  );
+                } else {
+                  // Navigate to details with the first post
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PlaceDetailsScreen(post: posts.first),
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Erreur lors du chargement du lieu')),
+                );
+              }
             },
           ),
         );
@@ -175,19 +246,32 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: AppTypography.h4.copyWith(
-        color: AppColors.textPrimary,
-        fontWeight: FontWeight.bold,
-      ),
+  Widget _buildSectionTitle(String title, String subtitle) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: AppTypography.h4.copyWith(
+            color: Theme.of(context).textTheme.bodyLarge?.color,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Text(
+          subtitle,
+          style: AppTypography.caption.copyWith(
+            color: Theme.of(context).brightness == Brightness.dark 
+                ? Colors.white38 
+                : AppColors.textLight
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildBudgetFilters() {
     return Row(
-      children: ['FCFA', 'FCFA FCFA', 'FCFA FCFA FCFA'].map((budget) {
+      children: ['< 5k', '5k - 15k', '> 15k'].map((budget) {
         final isSelected = _selectedBudget == budget;
         return Padding(
           padding: const EdgeInsets.only(right: AppDimensions.spaceSM),
@@ -206,11 +290,11 @@ class _SearchScreenState extends State<SearchScreen> {
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               fontSize: 12,
             ),
-            backgroundColor: Colors.white,
+            backgroundColor: Theme.of(context).cardColor,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppDimensions.radiusMD),
               side: BorderSide(
-                color: isSelected ? AppColors.primaryOrange : AppColors.borderColor,
+                color: isSelected ? AppColors.primaryOrange : Theme.of(context).dividerColor,
               ),
             ),
           ),
@@ -233,16 +317,18 @@ class _SearchScreenState extends State<SearchScreen> {
       itemBuilder: (context, index) {
         return Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(AppDimensions.radiusMD),
-            border: Border.all(color: AppColors.borderColor),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.02),
-                blurRadius: 5,
-                offset: const Offset(0, 2),
-              ),
-            ],
+            border: Border.all(color: Theme.of(context).dividerColor),
+            boxShadow: Theme.of(context).brightness == Brightness.dark 
+                ? null 
+                : [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.02),
+                      blurRadius: 5,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
           ),
           child: InkWell(
             onTap: () {},
@@ -257,7 +343,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     _categories[index],
                     style: AppTypography.bodySmall.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -268,19 +354,6 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildRecentSearches() {
-    final recent = ['Pizza', 'Sushi', 'Bistro', 'Plage de Ngor'];
-    return Column(
-      children: recent.map((item) => ListTile(
-        contentPadding: EdgeInsets.zero,
-        leading: const Icon(Icons.history, color: AppColors.textLight, size: 20),
-        title: Text(item, style: AppTypography.bodyMedium),
-        trailing: const Icon(Icons.north_west, color: AppColors.textLight, size: 16),
-        onTap: () {},
-      )).toList(),
     );
   }
 }

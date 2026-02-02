@@ -11,6 +11,8 @@ import 'package:found_food/features/stories/presentation/providers/story_provide
 import 'package:found_food/features/stories/presentation/screens/story_viewer_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:found_food/features/social/presentation/screens/followers_screen.dart';
+import 'package:found_food/features/social/presentation/screens/following_screen.dart';
 
 class PublicProfileScreen extends StatefulWidget {
   final String userId;
@@ -202,8 +204,26 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> with SingleTi
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               _buildStatItem('${_userPosts.length}', 'Posts'),
-              _buildStatItem('$followers', 'Followers'),
-              _buildStatItem('$following', 'Following'),
+              _buildStatItem(
+                '$followers', 
+                'Followers',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => FollowersScreen(userId: widget.userId)),
+                  );
+                },
+              ),
+              _buildStatItem(
+                '$following', 
+                'Following',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => FollowingScreen(userId: widget.userId)),
+                  );
+                },
+              ),
             ],
           ),
         );
@@ -211,21 +231,24 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> with SingleTi
     );
   }
 
-   Widget _buildStatItem(String value, String label) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: AppTypography.h4.copyWith(
-            color: AppColors.primaryOrange,
-            fontWeight: FontWeight.bold,
+   Widget _buildStatItem(String value, String label, {VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: AppTypography.h4.copyWith(
+              color: AppColors.primaryOrange,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-        Text(
-          label,
-          style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
-        ),
-      ],
+          Text(
+            label,
+            style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+          ),
+        ],
+      ),
     );
   }
 

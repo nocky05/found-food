@@ -61,6 +61,23 @@ class AuthProvider extends ChangeNotifier {
     await _authService.signOut();
   }
 
+  Future<bool> updatePassword(String newPassword) async {
+    _setLoading(true);
+    _clearError();
+    try {
+      await _authService.updatePassword(newPassword);
+      return true;
+    } on AuthException catch (e) {
+      _error = e.message;
+      return false;
+    } catch (e) {
+      _error = "Une erreur est survenue lors du changement de mot de passe";
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   void _setLoading(bool value) {
     _isLoading = value;
     notifyListeners();

@@ -27,6 +27,7 @@ class PlaceCard extends StatelessWidget {
   final VoidCallback? onLike;
   final VoidCallback? onFavorite;
   final VoidCallback? onComment;
+  final VoidCallback? onDelete;
 
   const PlaceCard({
     super.key,
@@ -49,6 +50,7 @@ class PlaceCard extends StatelessWidget {
     this.onLike,
     this.onFavorite,
     this.onComment,
+    this.onDelete,
   });
 
   @override
@@ -60,6 +62,7 @@ class PlaceCard extends StatelessWidget {
 
     final currentUserId = Supabase.instance.client.auth.currentUser?.id;
     final isCurrentUser = currentUserId == authorId;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return GestureDetector(
       onTap: onTap,
@@ -67,12 +70,13 @@ class PlaceCard extends StatelessWidget {
         margin: const EdgeInsets.only(
           left: 16,
           right: 16,
-          bottom: 8,
+          bottom: 16,
         ),
         decoration: BoxDecoration(
-          color: AppColors.cardBackground,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(20),
-          boxShadow: AppColors.cardShadow,
+          boxShadow: isDark ? [] : AppColors.cardShadow,
+          border: isDark ? Border.all(color: Colors.white10) : null,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -84,59 +88,64 @@ class PlaceCard extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
               child: Row(
                 children: [
-                   GestureDetector(
-                    onTap: () {
-                      if (!isCurrentUser) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PublicProfileScreen(userId: authorId),
+                   Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        if (!isCurrentUser) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => PublicProfileScreen(userId: authorId),
+                            ),
+                          );
+                        }
+                      },
+                      child: Row(
+                        children: [
+                           Consumer<ProfileProvider>(
+                            builder: (context, profileProvider, _) {
+                              // If it's the current user, use the live profile avatar
+                              // Otherwise, use the one from the post (authorAvatarUrl)
+                              final avatarUrl = (isCurrentUser && profileProvider.userProfile?.avatarUrl != null)
+                                  ? profileProvider.userProfile!.avatarUrl
+                                  : authorAvatarUrl;
+                              
+                              return CircleAvatar(
+                                radius: 14,
+                                backgroundColor: AppColors.primaryOrange.withOpacity(0.1),
+                                backgroundImage: avatarUrl != null && avatarUrl.isNotEmpty
+                                    ? NetworkImage(avatarUrl)
+                                    : null,
+                                child: avatarUrl == null || avatarUrl.isEmpty
+                                    ? const Icon(Icons.person, size: 16, color: AppColors.primaryOrange)
+                                    : null,
+                              );
+                            },
                           ),
-                        );
-                      }
-                    },
-                    child: Row(
-                      children: [
-                         Consumer<ProfileProvider>(
-                          builder: (context, profileProvider, _) {
-                            // If it's the current user, use the live profile avatar
-                            // Otherwise, use the one from the post (authorAvatarUrl)
-                            final avatarUrl = (isCurrentUser && profileProvider.userProfile?.avatarUrl != null)
-                                ? profileProvider.userProfile!.avatarUrl
-                                : authorAvatarUrl;
-                            
-                            return CircleAvatar(
-                              radius: 14,
-                              backgroundColor: AppColors.primaryOrange.withOpacity(0.1),
-                              backgroundImage: avatarUrl != null && avatarUrl.isNotEmpty
-                                  ? NetworkImage(avatarUrl)
-                                  : null,
-                              child: avatarUrl == null || avatarUrl.isEmpty
-                                  ? const Icon(Icons.person, size: 16, color: AppColors.primaryOrange)
-                                  : null,
-                            );
-                          },
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          authorName,
-                          style: AppTypography.bodySmall.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              authorName,
+                              style: AppTypography.bodySmall.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: isDark ? Colors.white : AppColors.textPrimary,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                    ),
-                  const Spacer(),
-                  // Follow Button
+                   const Spacer(),
+                  // Follow Button (only for other users)
                   if (!isCurrentUser)
                   Consumer<FollowProvider>(
                     builder: (context, followProvider, _) {
                       final isFollowing = followProvider.isFollowing(authorId);
                       return GestureDetector(
-                        onTap: () {
-                          followProvider.toggleFollow(authorId);
+                        onTap: () async {
+                          await followProvider.toggleFollow(authorId);
                         },
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -163,6 +172,51 @@ class PlaceCard extends StatelessWidget {
                       );
                     },
                   ),
+                  // Delete button for current user's posts
+                  if (isCurrentUser && onDelete != null)
+                  PopupMenuButton<String>(
+                    icon: Icon(
+                      Icons.more_vert, 
+                      size: 20, 
+                      color: isDark ? Colors.white70 : AppColors.textPrimary
+                    ),
+                    onSelected: (value) {
+                      if (value == 'delete') {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Supprimer le post'),
+                            content: const Text('Êtes-vous sûr de vouloir supprimer ce post ?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('Annuler'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  onDelete!();
+                                },
+                                child: const Text('Supprimer', style: TextStyle(color: Colors.red)),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            Icon(Icons.delete, color: Colors.red, size: 20),
+                            SizedBox(width: 8),
+                            Text('Supprimer', style: TextStyle(color: Colors.red)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -177,7 +231,7 @@ class PlaceCard extends StatelessWidget {
                   child: Container(
                     height: 120,
                     width: double.infinity,
-                    color: const Color(0xFFF5F5F5),
+                    color: isDark ? Colors.black26 : const Color(0xFFF5F5F5),
                     child: imageUrl.isNotEmpty
                         ? Image.network(
                             imageUrl,
@@ -240,7 +294,7 @@ class PlaceCard extends StatelessWidget {
                     placeName,
                     style: AppTypography.h3.copyWith(
                       fontSize: 17,
-                      color: AppColors.textPrimary,
+                      color: isDark ? Colors.white : AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 4),

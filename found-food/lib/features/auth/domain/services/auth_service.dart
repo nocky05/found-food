@@ -3,10 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class AuthService {
   final SupabaseClient _supabase = Supabase.instance.client;
 
-  // Obtenir l'utilisateur actuel
   User? get currentUser => _supabase.auth.currentUser;
-
-  // Stream pour écouter les changements d'état d'auth
   Stream<AuthState> get authStateChanges => _supabase.auth.onAuthStateChange;
 
   // Inscription avec Email et Mot de passe
@@ -58,6 +55,17 @@ class AuthService {
   Future<void> resetPassword(String email) async {
     try {
       await _supabase.auth.resetPasswordForEmail(email);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Changement de mot de passe (utilisateur connecté)
+  Future<void> updatePassword(String newPassword) async {
+    try {
+      await _supabase.auth.updateUser(
+        UserAttributes(password: newPassword),
+      );
     } catch (e) {
       rethrow;
     }

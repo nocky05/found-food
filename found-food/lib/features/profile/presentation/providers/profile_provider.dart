@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:found_food/features/profile/domain/models/profile_model.dart';
 import 'package:found_food/features/posts/domain/models/post_model.dart';
 import 'package:found_food/features/profile/domain/repositories/profile_repository.dart';
+import 'package:found_food/features/posts/domain/repositories/post_repository.dart';
 
 class ProfileProvider extends ChangeNotifier {
   final ProfileRepository _profileRepository = ProfileRepository();
@@ -75,6 +76,24 @@ class ProfileProvider extends ChangeNotifier {
     }
   }
 
+  // Mettre à jour les paramètres (Dark Mode, Notifications, etc.)
+  Future<void> updateSettings({bool? isDarkMode, bool? notificationsEnabled}) async {
+    if (_userProfile == null) return;
+
+    final updatedProfile = Profile(
+      id: _userProfile!.id,
+      username: _userProfile!.username,
+      fullName: _userProfile!.fullName,
+      avatarUrl: _userProfile!.avatarUrl,
+      bio: _userProfile!.bio,
+      updatedAt: _userProfile!.updatedAt,
+      isDarkMode: isDarkMode ?? _userProfile!.isDarkMode,
+      notificationsEnabled: notificationsEnabled ?? _userProfile!.notificationsEnabled,
+    );
+
+    await updateProfile(updatedProfile);
+  }
+
   // Upload Avatar
   Future<String?> uploadAvatar(Uint8List bytes) async {
     final userId = _supabase.auth.currentUser?.id;
@@ -126,6 +145,25 @@ class ProfileProvider extends ChangeNotifier {
       }
       notifyListeners();
       print("Erreur toggleFavorite: $e");
+    }
+  }
+
+  // Supprimer un post
+  Future<bool> deletePost(String postId) async {
+    try {
+      final postRepository = PostRepository();
+      await postRepository.deletePost(postId);
+      
+      // Mettre à jour les listes locales
+      _userPosts.removeWhere((p) => p.id == postId);
+      _favoritePosts.removeWhere((p) => p.id == postId);
+      
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = "Erreur lors de la suppression du post";
+      notifyListeners();
+      return false;
     }
   }
 }

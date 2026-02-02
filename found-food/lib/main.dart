@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'core/theme/theme_provider.dart';
 import 'features/auth/presentation/providers/auth_provider.dart';
 import 'features/posts/presentation/providers/post_provider.dart';
 import 'features/places/presentation/providers/place_provider.dart';
@@ -24,7 +25,10 @@ import 'package:found_food/features/search/presentation/providers/search_provide
 import 'package:found_food/features/map/presentation/providers/map_provider.dart';
 import 'package:found_food/features/stories/presentation/providers/story_provider.dart';
 import 'package:found_food/features/social/presentation/providers/follow_provider.dart';
+import 'package:found_food/features/social/data/repositories/notification_repository.dart';
+import 'package:found_food/features/social/presentation/providers/notification_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'core/providers/navigation_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,7 +50,14 @@ void main() async {
         ),
         ChangeNotifierProvider(create: (_) => MapProvider()),
         ChangeNotifierProvider(create: (_) => StoryProvider()),
-        ChangeNotifierProvider(create: (_) => FollowProvider()), // Added FollowProvider
+        ChangeNotifierProvider(create: (_) => FollowProvider()),
+        ChangeNotifierProvider(
+          create: (_) => NotificationProvider(
+            NotificationRepository(Supabase.instance.client),
+          ),
+        ),
+        ChangeNotifierProvider(create: (_) => NavigationProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
       child: const FoundFoodApp(),
     ),
@@ -58,11 +69,15 @@ class FoundFoodApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    
     return MaterialApp(
       title: 'Found-Food',
       debugShowCheckedModeBanner: false,
+      themeMode: themeProvider.themeMode,
       theme: ThemeData(
         useMaterial3: true,
+        brightness: Brightness.light,
         colorScheme: ColorScheme.light(
           primary: AppColors.primaryOrange,
           secondary: AppColors.secondaryYellow,
@@ -73,15 +88,41 @@ class FoundFoodApp extends StatelessWidget {
           fillColor: Colors.white,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: AppColors.borderColor),
+            borderSide: BorderSide(color: AppColors.borderColor),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: AppColors.borderColor),
+            borderSide: BorderSide(color: AppColors.borderColor),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: AppColors.primaryOrange),
+            borderSide: BorderSide(color: AppColors.primaryOrange),
+          ),
+        ),
+      ),
+      darkTheme: ThemeData(
+        useMaterial3: true,
+        brightness: Brightness.dark,
+        colorScheme: ColorScheme.dark(
+          primary: AppColors.primaryOrange,
+          secondary: AppColors.secondaryYellow,
+          surface: Colors.grey[900]!,
+        ),
+        scaffoldBackgroundColor: Colors.black,
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: Colors.grey[850],
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey[700]!),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey[700]!),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: AppColors.primaryOrange),
           ),
         ),
       ),
@@ -102,39 +143,34 @@ class FoundFoodApp extends StatelessWidget {
   }
 }
 
-class MainScreen extends StatefulWidget {
+class MainScreen extends StatelessWidget {
   const MainScreen({super.key});
 
-  @override
-  State<MainScreen> createState() => _MainScreenState();
-}
-
-class _MainScreenState extends State<MainScreen> {
-  int _currentIndex = 0;
-
-  final List<Widget> _screens = [
-    const FeedScreen(),
-    const SearchScreen(),
-    const AddSelectionScreen(),
-    const FavoritesScreen(),
-    const ProfileScreen(),
+  final List<Widget> _screens = const [
+    FeedScreen(),
+    SearchScreen(),
+    AddSelectionScreen(),
+    FavoritesScreen(),
+    ProfileScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
-      ),
-      bottomNavigationBar: BottomNavigation(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-      ),
+    return Consumer<NavigationProvider>(
+      builder: (context, navProvider, _) {
+        return Scaffold(
+          body: IndexedStack(
+            index: navProvider.currentIndex,
+            children: _screens,
+          ),
+          bottomNavigationBar: BottomNavigation(
+            currentIndex: navProvider.currentIndex,
+            onTap: (index) {
+              navProvider.setIndex(index);
+            },
+          ),
+        );
+      },
     );
   }
 }

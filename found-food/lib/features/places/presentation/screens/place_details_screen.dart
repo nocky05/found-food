@@ -6,16 +6,21 @@ import 'package:found_food/features/posts/domain/models/post_model.dart';
 import 'package:found_food/features/posts/presentation/providers/post_provider.dart';
 import 'package:found_food/features/places/domain/repositories/place_repository.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:found_food/features/profile/presentation/providers/profile_provider.dart';
 import 'package:found_food/features/social/presentation/providers/follow_provider.dart';
+import 'package:found_food/features/profile/presentation/screens/edit_profile_screen.dart';
+import 'package:found_food/features/auth/presentation/providers/auth_provider.dart';
 
 class PlaceDetailsScreen extends StatefulWidget {
-  final Post post;
+  final Post? post;
+  final String? postId;
   
   const PlaceDetailsScreen({
     super.key,
-    required this.post,
-  });
+    this.post,
+    this.postId,
+  }) : assert(post != null || postId != null, 'Either post or postId must be provided');
 
   @override
   State<PlaceDetailsScreen> createState() => _PlaceDetailsScreenState();
@@ -25,20 +30,52 @@ class _PlaceDetailsScreenState extends State<PlaceDetailsScreen> {
   final TextEditingController _commentController = TextEditingController();
   bool _isSubmittingComment = false;
   Place? _placeDetails;
+  Post? _post;
+  bool _isLoadingPost = true;
   bool _isLoadingPlace = true;
 
   @override
   void initState() {
     super.initState();
+    _post = widget.post;
+    if (_post != null) {
+      _isLoadingPost = false;
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<PostProvider>().fetchComments(widget.post.id);
-      _loadPlaceDetails();
+      _loadData();
     });
+  }
+
+  Future<void> _loadData() async {
+    if (_post == null && widget.postId != null) {
+      try {
+        // Fetch post if not provided
+        final response = await Supabase.instance.client
+            .from('posts_with_stats')
+            .select()
+            .eq('id', widget.postId!)
+            .single();
+        if (mounted) {
+          setState(() {
+            _post = Post.fromJson(Map<String, dynamic>.from(response));
+            _isLoadingPost = false;
+          });
+        }
+      } catch (e) {
+        print("Erreur chargement post: $e");
+        if (mounted) setState(() => _isLoadingPost = false);
+      }
+    }
+
+    if (_post != null) {
+      context.read<PostProvider>().fetchComments(_post!.id);
+      _loadPlaceDetails();
+    }
   }
 
   Future<void> _loadPlaceDetails() async {
     try {
-      final place = await PlaceRepository().getPlaceById(widget.post.placeId);
+      final place = await PlaceRepository().getPlaceById(_post!.placeId);
       if (mounted) {
         setState(() {
           _placeDetails = place;
@@ -63,7 +100,7 @@ class _PlaceDetailsScreenState extends State<PlaceDetailsScreen> {
     setState(() => _isSubmittingComment = true);
     try {
       await context.read<PostProvider>().addComment(
-        widget.post.id, 
+        _post!.id, 
         _commentController.text.trim()
       );
       _commentController.clear();
@@ -81,8 +118,21 @@ class _PlaceDetailsScreenState extends State<PlaceDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoadingPost) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+    
+    if (_post == null) {
+      return Scaffold(
+        appBar: AppBar(),
+        body: const Center(child: Text('Impossible de charger les détails du post')),
+      );
+    }
+
     return Scaffold(
-      backgroundColor: AppColors.backgroundColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: CustomScrollView(
         slivers: [
           _buildSliverAppBar(context),
@@ -101,7 +151,7 @@ class _PlaceDetailsScreenState extends State<PlaceDetailsScreen> {
                   _buildSectionTitle('L\'Expérience'),
                   const SizedBox(height: AppDimensions.spaceSM),
                   Text(
-                    widget.post.content ?? 'Pas de description.',
+                    _post!.content ?? 'Pas de description.',
                     style: AppTypography.bodyMedium,
                   ),
                   const SizedBox(height: AppDimensions.spaceMD),
@@ -147,7 +197,7 @@ class _PlaceDetailsScreenState extends State<PlaceDetailsScreen> {
           fit: StackFit.expand,
           children: [
             Image.network(
-              widget.post.mediaUrls.isNotEmpty ? widget.post.mediaUrls.first : 'https://picsum.photos/800/600',
+              _post!.mediaUrls.isNotEmpty ? _post!.mediaUrls.first : 'https://picsum.photos/800/600',
               fit: BoxFit.cover,
             ),
             DecoratedBox(
@@ -166,18 +216,53 @@ class _PlaceDetailsScreenState extends State<PlaceDetailsScreen> {
           ],
         ),
       ),
+      actions: [
+        if (_post!.authorId == Supabase.instance.client.auth.currentUser?.id)
+          IconButton(
+            icon: const Icon(Icons.delete_outline, color: Colors.white),
+            onPressed: () => _confirmDeletion(context),
+          ),
+      ],
     );
   }
 
+  Future<void> _confirmDeletion(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Supprimer le post'),
+        content: const Text('Êtes-vous sûr de vouloir supprimer ce post définitivement ?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Annuler'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Supprimer', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
 
+    if (confirmed == true && mounted) {
+      final success = await context.read<PostProvider>().deletePost(_post!.id);
+      if (success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Post supprimé avec succès')),
+        );
+        Navigator.pop(context); // Retourner à l'écran précédent
+      }
+    }
+  }
 
   Widget _buildAuthorSection(BuildContext context) {
     return Consumer<PostProvider>(
       builder: (context, provider, child) {
         // Retrouver le post à jour dans le provider si possible
         final currentPost = provider.feedPosts.firstWhere(
-          (p) => p.id == widget.post.id, 
-          orElse: () => widget.post
+          (p) => p.id == _post!.id, 
+          orElse: () => _post!
         );
 
         // Check follow status
@@ -251,7 +336,7 @@ class _PlaceDetailsScreenState extends State<PlaceDetailsScreen> {
             const SizedBox(width: 8),
             Consumer<ProfileProvider>(
               builder: (context, profileProvider, child) {
-                final isFav = profileProvider.favoritePosts.any((p) => p.id == widget.post.id);
+                final isFav = _post != null && profileProvider.favoritePosts.any((p) => p.id == _post!.id);
                 return Column(
                   children: [
                     IconButton(
@@ -284,7 +369,7 @@ class _PlaceDetailsScreenState extends State<PlaceDetailsScreen> {
           children: [
             Expanded(
               child: Text(
-                widget.post.placeName ?? 'Lieu inconnu',
+                _post!.placeName ?? 'Lieu inconnu',
                 style: AppTypography.h2.copyWith(color: AppColors.textPrimary, fontSize: 24),
               ),
             ),
@@ -296,7 +381,7 @@ class _PlaceDetailsScreenState extends State<PlaceDetailsScreen> {
             const Icon(Icons.location_on, color: AppColors.primaryOrange, size: 16),
             const SizedBox(width: 4),
             Text(
-              widget.post.placeAddress ?? 'Adresse non spécifiée',
+              _post!.placeAddress ?? 'Adresse non spécifiée',
               style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
             ),
           ],
@@ -317,15 +402,15 @@ class _PlaceDetailsScreenState extends State<PlaceDetailsScreen> {
         _infoCard(
           Icons.directions_walk, 
           'Durée Trajet', 
-          (widget.post.tripDuration != null && widget.post.tripDuration! > 0)
-              ? '${widget.post.tripDuration} min'
+          ( _post!.tripDuration != null && _post!.tripDuration! > 0)
+              ? '${_post!.tripDuration} min'
               : 'Non spécifié'
         ),
         const SizedBox(width: AppDimensions.spaceSM),
         _infoCard(
           Icons.commute, 
           'Moyen', 
-          widget.post.transportMode ?? 'Non spécifié'
+          _post!.transportMode ?? 'Non spécifié'
         ),
       ],
     );
@@ -378,7 +463,7 @@ class _PlaceDetailsScreenState extends State<PlaceDetailsScreen> {
             ],
           ),
           Text(
-            '${widget.post.budgetSpent?.toInt() ?? 0} FCFA',
+            '${_post!.budgetSpent?.toInt() ?? 0} FCFA',
             style: AppTypography.h3.copyWith(color: AppColors.primaryOrange, fontSize: 18),
           ),
         ],
@@ -396,7 +481,7 @@ class _PlaceDetailsScreenState extends State<PlaceDetailsScreen> {
       ),
       child: Column(
         children: [
-          _buildDetailRow(Icons.map_outlined, 'Adresse', widget.post.placeAddress ?? 'Non spécifiée'),
+          _buildDetailRow(Icons.map_outlined, 'Adresse', _post!.placeAddress ?? 'Non spécifiée'),
           const Divider(height: 24),
           _buildDetailRow(Icons.category_outlined, 'Catégorie', 'Restaurant'),
         ],
@@ -437,9 +522,9 @@ class _PlaceDetailsScreenState extends State<PlaceDetailsScreen> {
             children: [
               const Icon(Icons.commute_outlined, color: AppColors.primaryOrange, size: 20),
               const SizedBox(width: 8),
-              Text('Transport : ${widget.post.transportMode ?? "Non spécifié"}', style: const TextStyle(fontWeight: FontWeight.bold)),
+              Text('Transport : ${_post!.transportMode ?? "Non spécifié"}', style: const TextStyle(fontWeight: FontWeight.bold)),
               const Spacer(),
-              Text('Coût : ${widget.post.tripCost?.toInt() ?? 0} FCFA', style: const TextStyle(color: AppColors.primaryOrange, fontWeight: FontWeight.bold, fontSize: 13)),
+              Text('Coût : ${_post!.tripCost?.toInt() ?? 0} FCFA', style: const TextStyle(color: AppColors.primaryOrange, fontWeight: FontWeight.bold, fontSize: 13)),
             ],
           ),
         ],
@@ -455,7 +540,7 @@ class _PlaceDetailsScreenState extends State<PlaceDetailsScreen> {
   }
 
   Widget _buildMediaGallery(BuildContext context) {
-    if (widget.post.mediaUrls.isEmpty) return const SizedBox();
+    if (_post!.mediaUrls.isEmpty) return const SizedBox();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -465,7 +550,7 @@ class _PlaceDetailsScreenState extends State<PlaceDetailsScreen> {
           height: 120,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            itemCount: widget.post.mediaUrls.length,
+            itemCount: _post!.mediaUrls.length,
             itemBuilder: (context, index) {
               return Container(
                 width: 120,
@@ -473,7 +558,7 @@ class _PlaceDetailsScreenState extends State<PlaceDetailsScreen> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(AppDimensions.radiusMD),
                   image: DecorationImage(
-                    image: NetworkImage(widget.post.mediaUrls[index]),
+                    image: NetworkImage(_post!.mediaUrls[index]),
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -489,9 +574,13 @@ class _PlaceDetailsScreenState extends State<PlaceDetailsScreen> {
     return Container(
       padding: const EdgeInsets.all(AppDimensions.paddingSM),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.borderColor),
+        border: Border.all(
+          color: Theme.of(context).brightness == Brightness.dark 
+              ? Colors.white10 
+              : AppColors.borderColor
+        ),
       ),
       child: Row(
         children: [
@@ -521,14 +610,16 @@ class _PlaceDetailsScreenState extends State<PlaceDetailsScreen> {
     return Container(
       padding: const EdgeInsets.all(AppDimensions.paddingMD),
       decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
+        color: Theme.of(context).cardColor,
+        boxShadow: Theme.of(context).brightness == Brightness.dark 
+          ? [] 
+          : [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, -2),
+              ),
+            ],
       ),
       child: Row(
         children: [
@@ -574,12 +665,17 @@ class _PlaceDetailsScreenState extends State<PlaceDetailsScreen> {
       builder: (context, provider, child) {
         final comments = provider.currentPostComments;
         if (comments.isEmpty) {
-          return const Padding(
-            padding: EdgeInsets.symmetric(vertical: 20),
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20),
             child: Center(
               child: Text(
                 'Aucun commentaire pour le moment.',
-                style: TextStyle(color: AppColors.textSecondary, fontStyle: FontStyle.italic),
+                style: TextStyle(
+                  color: Theme.of(context).brightness == Brightness.dark 
+                      ? Colors.white54 
+                      : Color(0xFF636E72), // AppColors.textSecondary
+                  fontStyle: FontStyle.italic,
+                ),
               ),
             ),
           );

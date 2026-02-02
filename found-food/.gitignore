@@ -106,7 +106,6 @@ test_driver/
 *.jks
 
 # Web
-lib/generated_plugin_registrant.dart
 
 # Windows
 windows/flutter/generated_plugin_registrant.cc

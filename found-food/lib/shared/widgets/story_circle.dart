@@ -20,6 +20,9 @@ class StoryCircle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -45,14 +48,17 @@ class StoryCircle extends StatelessWidget {
                           )
                         : null,
                     border: !hasStory
-                        ? Border.all(color: const Color(0xFFDFE6E9), width: 2)
+                        ? Border.all(
+                            color: isDark ? Colors.grey[800]! : const Color(0xFFDFE6E9), 
+                            width: 2
+                          )
                         : null,
                   ),
                   padding: const EdgeInsets.all(3),
                   child: Container(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.white,
+                      color: theme.scaffoldBackgroundColor,
                     ),
                     padding: const EdgeInsets.all(2),
                     child: ClipOval(
@@ -62,20 +68,20 @@ class StoryCircle extends StatelessWidget {
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) {
                                 return Container(
-                                  color: const Color(0xFFF5F5F5),
-                                  child: const Icon(
+                                  color: isDark ? Colors.grey[900] : const Color(0xFFF5F5F5),
+                                  child: Icon(
                                     Icons.person,
-                                    color: Color(0xFF95A5A6),
+                                    color: isDark ? Colors.white24 : const Color(0xFF95A5A6),
                                     size: 30,
                                   ),
                                 );
                               },
                             )
                           : Container(
-                              color: const Color(0xFFF5F5F5),
-                              child: const Icon(
+                              color: isDark ? Colors.grey[900] : const Color(0xFFF5F5F5),
+                              child: Icon(
                                 Icons.person,
-                                color: Color(0xFF95A5A6),
+                                color: isDark ? Colors.white24 : const Color(0xFF95A5A6),
                                 size: 30,
                               ),
                             ),
@@ -95,7 +101,10 @@ class StoryCircle extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: const Color(0xFFFF6B35),
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 2),
+                          border: Border.all(
+                            color: theme.scaffoldBackgroundColor, 
+                            width: 2
+                          ),
                         ),
                         child: const Icon(
                           Icons.add,
@@ -114,9 +123,9 @@ class StoryCircle extends StatelessWidget {
               width: 70,
               child: Text(
                 name,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
-                  color: Color(0xFF2D3436),
+                  color: theme.textTheme.bodyMedium?.color,
                   fontWeight: FontWeight.w500,
                 ),
                 textAlign: TextAlign.center,

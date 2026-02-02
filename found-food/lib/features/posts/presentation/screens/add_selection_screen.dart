@@ -8,8 +8,10 @@ class AddSelectionScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppColors.backgroundColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
         children: [
           // Background Elements (Decorations)
@@ -51,11 +53,11 @@ class AddSelectionScreen extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.all(32),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: isDark ? Colors.white.withOpacity(0.05) : Colors.white,
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.primaryOrange.withOpacity(0.2),
+                            color: AppColors.primaryOrange.withOpacity(isDark ? 0.1 : 0.2),
                             blurRadius: 30,
                             offset: const Offset(0, 10),
                           ),
@@ -73,7 +75,7 @@ class AddSelectionScreen extends StatelessWidget {
                   Text(
                     'Partagez votre découverte',
                     style: AppTypography.h2.copyWith(
-                      color: AppColors.textPrimary,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
                       fontSize: 28,
                     ),
                     textAlign: TextAlign.center,
@@ -82,7 +84,7 @@ class AddSelectionScreen extends StatelessWidget {
                   Text(
                     'Ajoutez un lieu, une photo de son menu et racontez votre expérience en une seule étape.',
                     style: AppTypography.bodyMedium.copyWith(
-                      color: AppColors.textSecondary,
+                      color: isDark ? Colors.white70 : AppColors.textSecondary,
                       height: 1.5,
                     ),
                     textAlign: TextAlign.center,

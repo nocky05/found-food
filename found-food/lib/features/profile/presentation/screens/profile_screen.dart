@@ -7,10 +7,14 @@ import 'package:found_food/features/profile/presentation/screens/settings_screen
 import 'package:found_food/features/profile/presentation/providers/profile_provider.dart';
 import 'package:found_food/features/places/presentation/screens/place_details_screen.dart';
 import 'package:found_food/features/stories/presentation/providers/story_provider.dart';
+import 'package:found_food/features/stories/presentation/screens/story_creator_screen.dart';
 import 'package:found_food/features/stories/presentation/screens/story_viewer_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:found_food/features/social/presentation/providers/follow_provider.dart';
+import 'package:found_food/features/social/presentation/screens/followers_screen.dart';
+import 'package:found_food/features/social/presentation/screens/following_screen.dart';
+import 'package:found_food/features/social/presentation/screens/notifications_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -41,7 +45,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: _buildAppBar(),
       body: Consumer2<ProfileProvider, FollowProvider>( // Use Consumer2
         builder: (context, provider, followProvider, child) {
@@ -80,29 +84,23 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   }
 
   PreferredSizeWidget _buildAppBar() {
+    final theme = Theme.of(context);
+
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.cardColor,
       elevation: 0,
       title: Text(
         'Mon Profil',
-        style: AppTypography.h3.copyWith(color: AppColors.textPrimary),
+        style: AppTypography.h3.copyWith(
+          color: theme.textTheme.bodyLarge?.color
+        ),
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.person_add_alt_1_outlined, color: AppColors.textPrimary),
-          onPressed: () {
-             // Rediriger vers la recherche pour trouver des personnes
-             // Idéalement, on utiliserait un écran dédié "Discover People", 
-             // mais pour l'instant SearchScreen est un bon point de départ.
-             // On changera l'index du BottomNav vers Search (index 1) via un provider ou event si besoin,
-             // ou on push SearchScreen directement.
-             Navigator.pushNamed(context, '/main'); // Hack simple : refresh ou aller au main
-             // Mieux : 
-             // Navigator.push(context, MaterialPageRoute(builder: (_) => const SearchScreen()));
-          },
-        ),
-        IconButton(
-          icon: const Icon(Icons.settings_outlined, color: AppColors.textPrimary),
+          icon: Icon(
+            Icons.settings_outlined, 
+            color: theme.textTheme.bodyLarge?.color
+          ),
           onPressed: () {
             Navigator.push(
               context,
@@ -115,6 +113,8 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   }
 
   Widget _buildProfileHeader(ProfileProvider provider) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final profile = provider.userProfile;
 
     if (profile == null) return const SizedBox.shrink();
@@ -129,8 +129,8 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
               final hasActiveStory = storyProvider.hasActiveStory(profile.id);
               
               return GestureDetector(
-                onTap: hasActiveStory 
-                  ? () {
+                  onTap: () {
+                    if (hasActiveStory) {
                       final index = storyProvider.userStories.indexWhere((s) => s.userId == profile.id);
                       if (index != -1) {
                         Navigator.push(
@@ -143,26 +143,59 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                           ),
                         );
                       }
+                    } else {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const StoryCreatorScreen(),
+                        ),
+                      );
                     }
-                  : null, 
-                child: Container(
-                  padding: const EdgeInsets.all(3),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: hasActiveStory
-                        ? Border.all(color: AppColors.primaryOrange, width: 3)
-                        : null,
-                  ),
-                  child: CircleAvatar(
-                    radius: 50,
-                    backgroundColor: AppColors.lightPeach,
-                    backgroundImage: (profile.avatarUrl != null && profile.avatarUrl!.isNotEmpty)
-                        ? NetworkImage(profile.avatarUrl!)
-                        : null,
-                    child: (profile.avatarUrl == null || profile.avatarUrl!.isEmpty)
-                        ? const Icon(Icons.person, size: 50, color: AppColors.primaryOrange)
-                        : null,
-                  ),
+                  },
+                child: Stack(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(3),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: hasActiveStory
+                            ? Border.all(color: AppColors.primaryOrange, width: 3)
+                            : null,
+                      ),
+                      child: CircleAvatar(
+                        radius: 50,
+                        backgroundColor: isDark ? Colors.grey[900] : AppColors.lightPeach,
+                        backgroundImage: (profile.avatarUrl != null && profile.avatarUrl!.isNotEmpty)
+                            ? NetworkImage(profile.avatarUrl!)
+                            : null,
+                        child: (profile.avatarUrl == null || profile.avatarUrl!.isEmpty)
+                            ? Icon(
+                                Icons.person, 
+                                size: 50, 
+                                color: isDark ? Colors.white24 : AppColors.primaryOrange
+                              )
+                            : null,
+                      ),
+                    ),
+                    if (!hasActiveStory)
+                    Positioned(
+                      bottom: 4,
+                      right: 4,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryOrange,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Theme.of(context).cardColor, width: 3),
+                        ),
+                        child: const Icon(
+                          Icons.add,
+                          size: 16,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               );
             }
@@ -170,12 +203,14 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           const SizedBox(height: AppDimensions.spaceMD),
           Text(
             profile.fullName ?? 'Utilisateur',
-            style: AppTypography.h3.copyWith(color: AppColors.textPrimary),
+            style: AppTypography.h3.copyWith(color: theme.textTheme.bodyLarge?.color),
           ),
           if (profile.username != null)
             Text(
               '@${profile.username}',
-              style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+              style: AppTypography.bodySmall.copyWith(
+                color: isDark ? Colors.white54 : AppColors.textSecondary
+              ),
             ),
           const SizedBox(height: AppDimensions.spaceSM),
           if (profile.bio != null)
@@ -184,7 +219,9 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
               child: Text(
                 profile.bio!,
                 textAlign: TextAlign.center,
-                style: AppTypography.bodyMedium.copyWith(color: AppColors.textPrimary),
+                style: AppTypography.bodyMedium.copyWith(
+                  color: isDark ? Colors.white70 : AppColors.textPrimary
+                ),
               ),
             ),
         ],
@@ -203,28 +240,53 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _buildStatItem('${profileProvider.userPosts.length}', 'Posts'),
-          _buildStatItem('$followers', 'Followers'),
-          _buildStatItem('$following', 'Following'),
+          _buildStatItem(
+            '$followers', 
+            'Followers',
+            onTap: userId != null ? () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => FollowersScreen(userId: userId)),
+              );
+            } : null,
+          ),
+          _buildStatItem(
+            '$following', 
+            'Following',
+            onTap: userId != null ? () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => FollowingScreen(userId: userId)),
+              );
+            } : null,
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildStatItem(String value, String label) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: AppTypography.h4.copyWith(
-            color: AppColors.primaryOrange,
-            fontWeight: FontWeight.bold,
+  Widget _buildStatItem(String value, String label, {VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: AppTypography.h4.copyWith(
+              color: AppColors.primaryOrange,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-        Text(
-          label,
-          style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
-        ),
-      ],
+          Text(
+            label,
+            style: AppTypography.bodySmall.copyWith(
+              color: Theme.of(context).brightness == Brightness.dark 
+                  ? Colors.white38 
+                  : AppColors.textSecondary
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -253,19 +315,6 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
               child: const Text('Modifier le profil'),
             ),
           ),
-          const SizedBox(width: AppDimensions.spaceSM),
-          Container(
-            decoration: BoxDecoration(
-              color: AppColors.lightPeach,
-              borderRadius: BorderRadius.circular(AppDimensions.radiusMD),
-            ),
-            child: IconButton(
-              onPressed: () {
-                // Pourrait ouvrir la liste des gens suivis
-              },
-              icon: const Icon(Icons.people_alt_outlined, color: AppColors.primaryOrange),
-            ),
-          ),
         ],
       ),
     );
@@ -283,7 +332,9 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
         controller: _tabController,
         indicatorColor: AppColors.primaryOrange,
         labelColor: AppColors.primaryOrange,
-        unselectedLabelColor: AppColors.textSecondary,
+        unselectedLabelColor: Theme.of(context).brightness == Brightness.dark 
+            ? Colors.white38 
+            : AppColors.textSecondary,
         tabs: const [
           Tab(icon: Icon(Icons.grid_on_outlined)),
           Tab(icon: Icon(Icons.bookmark_outline)),
@@ -328,14 +379,53 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
               ),
             );
           },
+          onLongPress: () => _showDeleteConfirmation(context, post.id),
           child: Container(
-            color: Colors.grey[200],
+            color: Theme.of(context).brightness == Brightness.dark 
+                ? Colors.grey[900] 
+                : Colors.grey[200],
             child: post.mediaUrls.isNotEmpty 
                 ? Image.network(post.mediaUrls.first, fit: BoxFit.cover)
-                : const Icon(Icons.image, color: Colors.grey),
+                : Icon(
+                    Icons.image, 
+                    color: Theme.of(context).brightness == Brightness.dark 
+                        ? Colors.white10 
+                        : Colors.grey
+                  ),
           ),
         );
       },
+    );
+  }
+
+  void _showDeleteConfirmation(BuildContext context, String postId) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Supprimer la publication ?'),
+        content: const Text('Cette action est irréversible.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Annuler'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              final success = await context.read<ProfileProvider>().deletePost(postId);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(success ? 'Publication supprimée' : 'Erreur lors de la suppression'),
+                    backgroundColor: success ? Colors.green : Colors.red,
+                  ),
+                );
+              }
+            },
+            child: const Text('Supprimer', style: TextStyle(color: AppColors.errorColor)),
+          ),
+        ],
+      ),
     );
   }
 
@@ -368,10 +458,17 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
             );
           },
           child: Container(
-            color: Colors.grey[200],
+            color: Theme.of(context).brightness == Brightness.dark 
+                ? Colors.grey[900] 
+                : Colors.grey[200],
             child: post.mediaUrls.isNotEmpty 
                 ? Image.network(post.mediaUrls.first, fit: BoxFit.cover)
-                : const Icon(Icons.bookmark, color: Colors.grey),
+                : Icon(
+                    Icons.bookmark, 
+                    color: Theme.of(context).brightness == Brightness.dark 
+                        ? Colors.white10 
+                        : Colors.grey
+                  ),
           ),
         );
       },

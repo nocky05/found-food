@@ -13,37 +13,44 @@ class BottomNavigation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.bottomNavBackground,
-        boxShadow: [
+        color: theme.cardColor,
+        boxShadow: isDark ? [] : [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, -2),
           ),
         ],
+        border: isDark ? const Border(top: BorderSide(color: Colors.white10)) : null,
       ),
       child: SafeArea(
         child: Container(
-          height: 56,  // Réduit de 60 à 56
+          height: 56,
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildNavItem(
+                context,
                 icon: Icons.home_outlined,
                 activeIcon: Icons.home,
                 label: 'Home',
                 index: 0,
               ),
               _buildNavItem(
+                context,
                 icon: Icons.search_outlined,
                 activeIcon: Icons.search,
                 label: 'Search',
                 index: 1,
               ),
               _buildNavItem(
+                context,
                 icon: Icons.add_circle_outline,
                 activeIcon: Icons.add_circle,
                 label: 'Add',
@@ -51,12 +58,14 @@ class BottomNavigation extends StatelessWidget {
                 isCenter: true,
               ),
               _buildNavItem(
+                context,
                 icon: Icons.favorite_outline,
                 activeIcon: Icons.favorite,
                 label: 'Favorites',
                 index: 3,
               ),
               _buildNavItem(
+                context,
                 icon: Icons.person_outline,
                 activeIcon: Icons.person,
                 label: 'Profile',
@@ -69,7 +78,8 @@ class BottomNavigation extends StatelessWidget {
     );
   }
 
-  Widget _buildNavItem({
+  Widget _buildNavItem(
+    BuildContext context, {
     required IconData icon,
     required IconData activeIcon,
     required String label,
@@ -77,12 +87,14 @@ class BottomNavigation extends StatelessWidget {
     bool isCenter = false,
   }) {
     final isActive = currentIndex == index;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     
     return GestureDetector(
       onTap: () => onTap(index),
       behavior: HitTestBehavior.opaque,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),  // Réduit de 8 à 6
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -90,18 +102,18 @@ class BottomNavigation extends StatelessWidget {
               isActive ? activeIcon : icon,
               color: isActive 
                   ? AppColors.bottomNavActive 
-                  : AppColors.bottomNavInactive,
-              size: isCenter ? 26 : 22,  // Réduit de 28/24 à 26/22
+                  : (isDark ? Colors.white38 : AppColors.bottomNavInactive),
+              size: isCenter ? 26 : 22,
             ),
-            const SizedBox(height: 3),  // Réduit de 4 à 3
+            const SizedBox(height: 3),
             Text(
               label,
               style: TextStyle(
-                fontSize: 10,  // Réduit de 11 à 10
+                fontSize: 10,
                 fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
                 color: isActive 
                     ? AppColors.bottomNavActive 
-                    : AppColors.bottomNavInactive,
+                    : (isDark ? Colors.white38 : AppColors.bottomNavInactive),
               ),
             ),
           ],

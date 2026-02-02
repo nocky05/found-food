@@ -14,7 +14,9 @@ import 'package:found_food/shared/widgets/place_card.dart';
 import 'package:found_food/features/places/presentation/screens/place_details_screen.dart';
 import 'package:found_food/features/profile/presentation/providers/profile_provider.dart';
 import 'package:found_food/features/social/presentation/screens/notifications_screen.dart';
+import 'package:found_food/features/social/presentation/providers/notification_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:found_food/core/providers/navigation_provider.dart';
 
 class FeedScreen extends StatefulWidget {
   const FeedScreen({super.key});
@@ -31,6 +33,7 @@ class _FeedScreenState extends State<FeedScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<PostProvider>().fetchFeed();
       context.read<StoryProvider>().fetchStories();
+      context.read<NotificationProvider>().fetchNotifications();
     });
   }
   // Données de démonstration pour les stories
@@ -79,8 +82,11 @@ class _FeedScreenState extends State<FeedScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppColors.backgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -118,12 +124,18 @@ class _FeedScreenState extends State<FeedScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.restaurant_outlined, size: 64, color: Colors.grey),
+                          Icon(
+                            Icons.restaurant_outlined, 
+                            size: 64, 
+                            color: isDark ? Colors.white24 : Colors.grey
+                          ),
                           const SizedBox(height: 16),
                           Text(
                             'Aucun post pour le moment.\nSoyez le premier à partager !',
                             textAlign: TextAlign.center,
-                            style: AppTypography.bodyLarge.copyWith(color: AppColors.textSecondary),
+                            style: AppTypography.bodyLarge.copyWith(
+                              color: isDark ? Colors.white54 : AppColors.textSecondary
+                            ),
                           ),
                         ],
                       ),
@@ -154,6 +166,14 @@ class _FeedScreenState extends State<FeedScreen> {
                           onLike: () => postProvider.toggleLike(post),
                           onFavorite: () => profileProvider.toggleFavorite(post),
                           onComment: () => _showCommentModal(context, post),
+                          onDelete: () async {
+                            final success = await postProvider.deletePost(post.id);
+                            if (context.mounted && success) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Post supprimé')),
+                              );
+                            }
+                          },
                           onTap: () {
                             Navigator.push(
                               context,
@@ -209,11 +229,7 @@ class _FeedScreenState extends State<FeedScreen> {
           IconButton(
             icon: const Icon(Icons.search, color: Colors.white),
             onPressed: () {
-              // TODO: Implement search navigation if needed, 
-              // but currently handled by the bottom navigation bar.
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Utilisez l\'onglet Recherche en bas pour chercher un lieu.')),
-              );
+              context.read<NavigationProvider>().setIndex(1);
             },
           ),
           
@@ -232,30 +248,36 @@ class _FeedScreenState extends State<FeedScreen> {
           ),
           
           // Notifications Icon with badge
-          Stack(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.notifications_outlined, color: Colors.white),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const NotificationsScreen()),
-                  );
-                },
-              ),
-              Positioned(
-                right: 8,
-                top: 8,
-                child: Container(
-                  width: 8,
-                  height: 8,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFD63031),
-                    shape: BoxShape.circle,
+          Consumer<NotificationProvider>(
+            builder: (context, notificationProvider, _) {
+              final hasUnread = notificationProvider.unreadCount > 0;
+              return Stack(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.notifications_outlined, color: Colors.white),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const NotificationsScreen()),
+                      );
+                    },
                   ),
-                ),
-              ),
-            ],
+                  if (hasUnread)
+                  Positioned(
+                    right: 8,
+                    top: 8,
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFD63031),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
         ],
       ),

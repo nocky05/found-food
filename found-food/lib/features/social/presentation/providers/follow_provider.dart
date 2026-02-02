@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:found_food/features/social/data/repositories/follow_repository.dart';
 
 class FollowProvider extends ChangeNotifier {
@@ -47,17 +48,31 @@ class FollowProvider extends ChangeNotifier {
 
   // Toggle follow avec mise à jour optimiste
   Future<bool> toggleFollow(String userId) async {
+    final currentUserId = Supabase.instance.client.auth.currentUser?.id;
+    
+    // Empêcher de se suivre soi-même
+    if (userId == currentUserId) return false;
+
     final currentStatus = isFollowing(userId);
     
     // 1. Mise à jour optimiste immédiate
     _followingStatus[userId] = !currentStatus;
     
     // Mise à jour optimiste des compteurs (si chargés)
+    // 1a. Compteur de followers de la cible
     if (_userStats.containsKey(userId)) {
       final currentFollowers = _userStats[userId]!['followers']!;
       _userStats[userId]!['followers'] = currentStatus 
           ? currentFollowers - 1 
           : currentFollowers + 1;
+    }
+
+    // 1b. Compteur de following de l'utilisateur actuel
+    if (currentUserId != null && _userStats.containsKey(currentUserId)) {
+      final currentFollowing = _userStats[currentUserId]!['following']!;
+      _userStats[currentUserId]!['following'] = currentStatus 
+          ? currentFollowing - 1 
+          : currentFollowing + 1;
     }
     
     notifyListeners();
@@ -70,22 +85,29 @@ class FollowProvider extends ChangeNotifier {
       if (newStatus != !currentStatus) {
         _followingStatus[userId] = newStatus;
         // Correction du compteur (retour à l'état initial + ajustement réel)
-        if (_userStats.containsKey(userId)) {
-           // On recharge pour être sûr
-           await fetchUserStats(userId);
-        }
+        if (_userStats.containsKey(userId)) await fetchUserStats(userId);
+        if (currentUserId != null && _userStats.containsKey(currentUserId)) await fetchUserStats(currentUserId);
         notifyListeners();
       }
       return newStatus;
     } catch (e) {
       // 4. En cas d'erreur, rollback
       _followingStatus[userId] = currentStatus;
+      
       if (_userStats.containsKey(userId)) {
         final currentFollowers = _userStats[userId]!['followers']!;
         _userStats[userId]!['followers'] = currentStatus 
-            ? currentFollowers + 1 // On avait décrémenté, on réincrémente
-            : currentFollowers - 1; // On avait incrémenté, on décrémente
+            ? currentFollowers + 1 
+            : currentFollowers - 1;
       }
+
+      if (currentUserId != null && _userStats.containsKey(currentUserId)) {
+        final currentFollowing = _userStats[currentUserId]!['following']!;
+        _userStats[currentUserId]!['following'] = currentStatus 
+            ? currentFollowing + 1 
+            : currentFollowing - 1;
+      }
+      
       notifyListeners();
       return currentStatus;
     }
