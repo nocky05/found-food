@@ -1,17 +1,17 @@
-# 🍽️ Found-Food
+#  Found-Food
 
 Une application mobile de partage d'expériences gastronomiques et de découverte de lieux (restaurants, parcs, plages, etc.) avec informations de trajet et fonctionnalités sociales.
 
-## 📱 À Propos
+##  À Propos
 
 **Found-Food** est une application sociale qui permet aux utilisateurs de :
-- 🔍 Découvrir des lieux selon leur budget et proximité
-- 📸 Partager leurs expériences avec photos et vidéos
-- 💬 Interagir via likes, commentaires et statuts
-- 🗺️ Obtenir des informations de trajet détaillées
-- 👥 Suivre d'autres utilisateurs et voir qui visite leur profil
+- Découvrir des lieux selon leur budget et proximité
+-  Partager leurs expériences avec photos et vidéos
+-  Interagir via likes, commentaires et statuts
+-  Obtenir des informations de trajet détaillées
+-  Suivre d'autres utilisateurs et voir qui visite leur profil
 
-## ✨ Fonctionnalités Principales
+##  Fonctionnalités Principales
 
 ### Pour les Utilisateurs
 - ✅ Connexion/Inscription avec Supabase Auth
@@ -30,7 +30,7 @@ Une application mobile de partage d'expériences gastronomiques et de découvert
 - ❌ Commandes en ligne
 - ❌ Paiement
 
-## 🏗️ Architecture
+## Architecture
 
 Le projet suit une **Clean Architecture** avec séparation des responsabilités :
 
@@ -45,7 +45,7 @@ lib/
 └── shared/               # Widgets et modèles partagés
 ```
 
-## 🎨 Design System
+##  Design System
 
 ### Palette de Couleurs
 - **Primary:** Coral Red (`#FF6B6B`) - Passion, énergie
@@ -59,7 +59,7 @@ lib/
 ### Spacing
 Système basé sur une grille de 8pt (4, 8, 16, 24, 32, 48, 64px)
 
-## 🛠️ Stack Technique
+##  Stack Technique
 
 ### Frontend
 - **Framework:** Flutter 3.2+
@@ -89,7 +89,7 @@ dependencies:
   lottie: ^2.7.0                  # Animations
 ```
 
-## 🚀 Installation
+##  Installation
 
 ### Prérequis
 - Flutter SDK 3.2.0 ou supérieur
@@ -128,7 +128,7 @@ static const String supabaseAnonKey = 'VOTRE_SUPABASE_ANON_KEY';
 flutter run
 ```
 
-## 📂 Structure du Projet
+## Structure du Projet
 
 ```
 found-food/
@@ -162,7 +162,7 @@ found-food/
 └── test/
 ```
 
-## 🗄️ Schéma de Base de Données
+##  Schéma de Base de Données
 
 ### Tables Principales
 - `profiles` - Profils utilisateurs
@@ -176,7 +176,7 @@ found-food/
 - `statuses` - Statuts 24h
 - `status_views` - Vues sur statuts
 
-## 🎯 Roadmap
+##  Roadmap
 
 ### Phase 1: Setup ✅
 - [x] Structure du projet
@@ -211,7 +211,7 @@ found-food/
 - [ ] Build APK/IPA
 - [ ] App store submission
 
-## 🤝 Contribution
+##  Contribution
 
 Les contributions sont les bienvenues ! Veuillez suivre ces étapes :
 
@@ -221,15 +221,15 @@ Les contributions sont les bienvenues ! Veuillez suivre ces étapes :
 4. Push vers la branche (`git push origin feature/AmazingFeature`)
 5. Ouvrir une Pull Request
 
-## 📝 License
+##  License
 
 Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
 
-## 👨‍💻 Auteur
+##  Auteur
 
-Développé avec ❤️ pour les amoureux de la gastronomie et de la découverte.
+Développé avec  pour les amoureux de la gastronomie et de la découverte.
 
-## 📧 Contact
+##  Contact
 
 Pour toute question ou suggestion, n'hésitez pas à ouvrir une issue.
 
